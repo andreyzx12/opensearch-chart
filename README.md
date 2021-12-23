@@ -1,2 +1,2 @@
-# opensearch-chart
-runAsNonRoot: true; readOnlyRootFilesystem: true
+# apidoc-elastic
+

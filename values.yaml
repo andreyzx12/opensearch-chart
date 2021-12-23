@@ -1,0 +1,84 @@
+global:
+  namespace: apidoc
+  name: apidoc-opensearch
+  image: docker.unixrepo.megafon.ru/opensearchproject/opensearch:1.2.3
+
+replicas: 1
+
+strategy:
+   type: RollingUpdate
+   rollingUpdate:
+     maxSurge: 0
+     maxUnavailable: 1
+
+service:
+  type: ClusterIP
+  protocol: TCP
+  httpPort: 9200
+  transportPort: 9600
+
+env:
+  - name: plugins.security.disabled
+    value: "true"
+  - name: discovery.type
+    value: single-node
+  
+volumeMounts:
+- mountPath: /tmp
+  name: vol1
+  subPath: tmp
+- mountPath: /usr/share/opensearch/logs
+  name: opensearch-logs
+  subPath: logs
+- mountPath: /usr/share/opensearch/data
+  name: opensearch-data
+  subPath: data
+# - mountPath: /usr/share/opensearch/bin/opensearch
+#   name: vol2
+#   subPath: opensearch
+- mountPath: /usr/share/opensearch/config/jvm.options
+  name: vol2
+  subPath: jvm.options
+- mountPath: /usr/share/opensearch/config/opensearch.yml
+  name: vol2
+  subPath: opensearch.yml
+- mountPath: /usr/share/opensearch/config/log4j2.properties
+  name: vol2
+  subPath: log4j2.properties
+- mountPath: /usr/share/opensearch/config
+  name: vol3
+
+volumes:
+- name: opensearch-logs
+  persistentVolumeClaim:
+    claimName: apidoc-opensearch-logs
+- name: opensearch-data
+  persistentVolumeClaim:
+    claimName: apidoc-opensearch-data
+- emptyDir: {}
+  name: vol1
+- name: vol2
+  configMap:
+    defaultMode: 0644
+    name: opensearch-configmap
+    items:
+    # - key: opensearch
+    #   path: opensearch
+    - key: jvm.options
+      path: jvm.options
+    - key: opensearch.yml
+      path: opensearch.yml
+    - key: log4j2.properties
+      path: log4j2.properties
+- emptyDir: {}
+  name: vol3
+
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "opensearch"
