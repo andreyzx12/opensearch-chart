@@ -1,7 +1,7 @@
 global:
   namespace: apidoc
   name: apidoc-opensearch
-  image: docker.unixrepo.megafon.ru/opensearchproject/opensearch:1.2.3
+  image: IMAGE
 
 replicas: 1
 
